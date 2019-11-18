@@ -3,15 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/modelo/EstadoDao.java</file>
             <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/visao/CadastroPessoa.java</file>
             <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/App.java</file>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/modelo/CidadeDao.java</file>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/modelo/Banco.java</file>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/modelo/PessoaDao.java</file>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/entidade/Pessoa.java</file>
+            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/visao/MeusPedidos.java</file>
             <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/visao/CadastroCidade.java</file>
-            <file>file:/C:/Users/Michel%20Robaskiewicz/Documents/Pós/POO/CRUDBasico/src/crud/visao/CadastroEstado.java</file>
         </group>
     </open-files>
 </project-private>

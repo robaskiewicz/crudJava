@@ -5,23 +5,14 @@
  */
 package crud.visao;
 
-import crud.modelo.Banco;
-import crud.modelo.CidadeDao;
-import crud.modelo.EstadoDao;
-import crud.modelo.PessoaDao;
+import dao.HibernateUtil;
 import entidade.Cidade;
-import entidade.Estado;
 import entidade.Pessoa;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -31,12 +22,20 @@ import javax.swing.table.DefaultTableModel;
 public class CadastroPessoa extends javax.swing.JFrame {
 
     /**
-     * Creates new form CadastroCidade
+     * Creates new form Cadastro Pessoa
      */
-    private Pessoa pe = new Pessoa();
-    public CidadeDao cidadeDao = new CidadeDao();
-    public PessoaDao pessoaoDao = new PessoaDao();
+    private List<Cidade> listaCidades;
+    private List<Pessoa> listaPessoas;
+    private Pessoa pes;
 
+    public List<Pessoa> getListaPessoas() {
+        return listaPessoas;
+    }
+
+    public void setListaPessoas(List<Pessoa> listaPessoas) {
+        this.listaPessoas = listaPessoas;
+    }
+    
     public CadastroPessoa() {
         initComponents();
         montaTabela();
@@ -64,7 +63,6 @@ public class CadastroPessoa extends javax.swing.JFrame {
         tabela = new javax.swing.JTable();
         jLabel3 = new javax.swing.JLabel();
         campoID = new javax.swing.JTextField();
-        btnAtualizar = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         campoNumero = new javax.swing.JTextField();
@@ -74,6 +72,7 @@ public class CadastroPessoa extends javax.swing.JFrame {
         campoRg = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         campoNome = new javax.swing.JTextField();
+        btnNovo = new javax.swing.JToggleButton();
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -122,18 +121,16 @@ public class CadastroPessoa extends javax.swing.JFrame {
 
             }
         ));
+        tabela.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabelaMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tabela);
 
         jLabel3.setText("ID:");
 
         campoID.setEditable(false);
-
-        btnAtualizar.setText("atualizar");
-        btnAtualizar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAtualizarActionPerformed(evt);
-            }
-        });
 
         jLabel4.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         jLabel4.setText("Cadastro de Pessoa");
@@ -146,6 +143,13 @@ public class CadastroPessoa extends javax.swing.JFrame {
 
         jLabel8.setText("nome:");
 
+        btnNovo.setText("Novo");
+        btnNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNovoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -155,18 +159,6 @@ public class CadastroPessoa extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(comboCidade, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(campoEndereco, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(campoNumero, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -183,13 +175,27 @@ public class CadastroPessoa extends javax.swing.JFrame {
                                 .addComponent(jLabel8)
                                 .addGap(18, 18, 18)
                                 .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnADD)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnRemover)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnAtualizar))
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel1)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(campoEndereco, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel5))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(comboCidade, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(btnADD)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(btnRemover)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnNovo)
+                                    .addComponent(campoNumero, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(40, 40, 40)
                         .addComponent(jLabel4)))
@@ -198,7 +204,7 @@ public class CadastroPessoa extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(29, Short.MAX_VALUE)
+                .addContainerGap(23, Short.MAX_VALUE)
                 .addComponent(jLabel4)
                 .addGap(35, 35, 35)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,21 +220,21 @@ public class CadastroPessoa extends javax.swing.JFrame {
                     .addComponent(jLabel7)
                     .addComponent(campoCpf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(campoRg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(campoEndereco, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
                     .addComponent(campoNumero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12)
+                .addGap(9, 9, 9)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(comboCidade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7)
+                    .addComponent(comboCidade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnNovo))
+                .addGap(4, 4, 4)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnADD)
-                    .addComponent(btnRemover)
-                    .addComponent(btnAtualizar))
+                    .addComponent(btnRemover))
                 .addGap(39, 39, 39)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -237,70 +243,48 @@ public class CadastroPessoa extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnADDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnADDActionPerformed
-        if (validaSalvar()) {
-            try {
-                pe.setNome(campoNome.getText());
-                pe.setEndereco(campoEndereco.getText());
-                pe.setNumero(campoNumero.getText());
-                pe.setCpf(campoCpf.getText());
-                pe.setRg(campoRg.getText());
-                pe.setCidade(comboCidade.getSelectedIndex());
-
-                if (campoID.getText().equals("")) {
-                    pessoaoDao.create(pe);
-                } else {
-                    pessoaoDao.update(pe, Integer.parseInt(campoID.getText()));
-                    System.out.println("EDITA AI");
-                }
-                    pessoaoDao.getResultList();
+        
+                if (validaSalvar()) {
+                try {
+                    if (!campoID.getText().equals("")) {
+                        pes.setId(Integer.parseInt(campoID.getText()));
+                    } else {
+                       pes.setId(null);
+                    }
+                    
+                    pes.setNome(campoNome.getText());
+                    pes.setEndereco(campoEndereco.getText());
+                    pes.setNumero(campoNumero.getText());
+                    pes.setCpf(campoCpf.getText());
+                    pes.setRg(campoRg.getText());
+                    pes.setCidade(listaCidades.get(comboCidade.getSelectedIndex()));
+                    
+                    HibernateUtil.beginTransaction();
+                    HibernateUtil.getSession().merge(pes);
+                    HibernateUtil.commitTransaction();
+                    HibernateUtil.closeSession();
+                    
                     limpaCampos();
                     atualizaTabela();
                     
-            } catch (Exception ex) {
-                Logger.getLogger(CadastroPessoa.class.getName()).log(Level.SEVERE, null, ex);
-            }
+                } catch (Exception ex) {
+                    Logger.getLogger(CadastroEstado.class.getName()).log(Level.SEVERE, null, ex);
+                }
         }
+
+                
+                    
+        
     }//GEN-LAST:event_btnADDActionPerformed
-
-    private void btnAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtualizarActionPerformed
-        try {
-            DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-
-            int row = tabela.getSelectedRow();
-
-            campoID.setText(tabela.getValueAt(row, 0).toString());
-            campoNome.setText(tabela.getValueAt(row, 1).toString());
-            campoEndereco.setText(tabela.getValueAt(row, 2).toString());
-            campoNumero.setText(tabela.getValueAt(row, 3).toString());
-            campoCpf.setText(tabela.getValueAt(row, 4).toString());
-            campoRg.setText(tabela.getValueAt(row, 5).toString());
-            comboCidade.setSelectedIndex(Integer.parseInt(tabela.getValueAt(row, 6).toString()));
-
-            pe.setId(Integer.parseInt(tabela.getValueAt(row, 0).toString()));
-            pe.setNome(tabela.getValueAt(row, 1).toString());
-            pe.setEndereco(tabela.getValueAt(row, 2).toString());
-            pe.setNumero(tabela.getValueAt(row, 3).toString());
-            pe.setCpf(tabela.getValueAt(row, 4).toString());
-            pe.setRg(tabela.getValueAt(row, 5).toString());
-            pe.setCidade(Integer.parseInt(tabela.getValueAt(row, 6).toString()));
-
-        } catch (Exception ex) {
-            Logger.getLogger(CadastroPessoa.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_btnAtualizarActionPerformed
 
     private void btnRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverActionPerformed
         try {
-            DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-            
-            //pega o item da tabela selecionado e remove da memoria
-            pessoaoDao.remove(tabela.getSelectedRow());
-            
-            //remove o item da tabela
-            model.removeRow(tabela.getSelectedRow());
-            
-            //busca lista para ver se realmente removeu da memoria.
-            pessoaoDao.getResultList();
+             HibernateUtil.beginTransaction();
+            HibernateUtil.getSession().delete(pes);
+            HibernateUtil.commitTransaction();
+            HibernateUtil.closeSession();
+            montaTabela();
+            limpaCampos();
         } catch (Exception ex) {
             Logger.getLogger(CadastroPessoa.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -309,6 +293,22 @@ public class CadastroPessoa extends javax.swing.JFrame {
     private void comboCidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboCidadeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_comboCidadeActionPerformed
+
+    private void tabelaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaMouseClicked
+        pes = listaPessoas.get(tabela.getSelectedRow());
+        campoID.setText(pes.getId().toString());
+        campoNome.setText(pes.getNome());
+        campoEndereco.setText(pes.getEndereco());
+        campoNumero.setText(pes.getNumero());
+        campoRg.setText(pes.getRg());
+        campoCpf.setText(pes.getCpf());
+        comboCidade.setSelectedItem(pes.getCidade());
+    }//GEN-LAST:event_tabelaMouseClicked
+
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+        pes = new Pessoa();
+        limpaCampos();
+    }//GEN-LAST:event_btnNovoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -348,7 +348,7 @@ public class CadastroPessoa extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnADD;
-    private javax.swing.JButton btnAtualizar;
+    private javax.swing.JToggleButton btnNovo;
     private javax.swing.JButton btnRemover;
     private javax.swing.JTextField campoCpf;
     private javax.swing.JTextField campoEndereco;
@@ -374,40 +374,38 @@ public class CadastroPessoa extends javax.swing.JFrame {
     ArrayList<Integer> idEstados = new ArrayList<>();
 
     private void preencherComboCidades() {
-        try {
-            Connection conn = Banco.abrirConexao();
-
-            comboCidade.removeAllItems();
-
-            for (Cidade c : cidadeDao.getCidades()) {
-                //para cada estado é adicionado o nome na combo de estado.
-                comboCidade.addItem(c.getNome());
-            }
-
-            conn.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        listaCidades = HibernateUtil.getSession().createCriteria(Cidade.class).list();
+        comboCidade.removeAllItems();
+        for (Cidade c : listaCidades) {
+            comboCidade.addItem(c.getNome());
         }
     }
 
     public void montaTabela() {
-        DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-
+        
+        listaPessoas = HibernateUtil.getSession().createCriteria(Pessoa.class).list();        
+        DefaultTableModel modelo = new DefaultTableModel(){
+            @Override
+    public boolean isCellEditable(int row, int column) {
+       //all cells false
+       return false;
+    }
+        };
         modelo.addColumn("Código");
         modelo.addColumn("Nome");
         modelo.addColumn("Endereço");
         modelo.addColumn("Numero");
         modelo.addColumn("Cpf");
         modelo.addColumn("Rg");
-        modelo.addColumn("Cidade");
-
-        for (Pessoa p : pessoaoDao.getPessoas()) {
-            modelo.addRow(new Object[]{p.getId(), p.getNome(), p.getEndereco(), p.getNumero(),p.getCpf(), p.getRg(), p.getCidade()});
+        modelo.addColumn("Cidade");       
+        for(Pessoa p : listaPessoas){
+            modelo.addRow(new Object[]{p.getId(), p.getNome(), p.getEndereco(), p.getNumero(), p.getCpf(), p.getRg(), p.getCidade()});
         }
-
-        JTable tabela = new JTable(modelo);
         tabela.setModel(modelo);
+ 
+        
+
+       
     }
 
     public void atualizaTabela() {

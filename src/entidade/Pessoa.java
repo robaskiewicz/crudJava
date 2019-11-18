@@ -1,32 +1,46 @@
 
 package entidade;
 
-import entidade.Cidade;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 /**
  *
  * @author Michel Robaskiewicz
  */
+@Entity
 public class Pessoa {
     
+    @Id 
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer Id;
+    @Column(length = 100, nullable = false)
     private String nome;
+    @Column(length = 11, nullable = false)
     private String cpf;
+    @Column(length = 14, nullable = false)
     private String rg;
+    @Column(length = 100, nullable = false)
     private String endereco;
+    @Column(length = 50, nullable = false)
     private String numero;
-    private Integer cidade;
+    @ManyToOne
+    private Cidade cidade;
     
     public Pessoa(){}
     
-    public Pessoa(String nome, String endereco, String numero, String cpf, String rg, Integer cidade){
-        this.nome=nome;
-        this.endereco=endereco;
-        this.numero=numero;
-        this.cpf=cpf;
-        this.rg=rg;
-        this.cidade=cidade;
-    }
+//    public Pessoa(String nome, String endereco, String numero, String cpf, String rg, Integer cidade){
+//        this.nome=nome;
+//        this.endereco=endereco;
+//        this.numero=numero;
+//        this.cpf=cpf;
+//        this.rg=rg;
+//        this.cidade=cidade;
+//    }
 
     public String getNome() {
         return nome;
@@ -67,14 +81,16 @@ public class Pessoa {
     public void setNumero(String numero) {
         this.numero = numero;
     }
-    
-    public Integer getCidade() {
+
+    public Cidade getCidade() {
         return cidade;
     }
-    
-    public void setCidade(Integer cidade) {
+
+    public void setCidade(Cidade cidade) {
         this.cidade = cidade;
     }
+    
+   
 
     public Integer getId() {
         return Id;

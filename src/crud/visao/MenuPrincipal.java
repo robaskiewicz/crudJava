@@ -35,6 +35,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
         itemMenuEstado = new javax.swing.JMenuItem();
         itemMenuCidade = new javax.swing.JMenuItem();
         itemMenuPessoa = new javax.swing.JMenuItem();
+        itemMenuProduto = new javax.swing.JMenuItem();
+        itemMenuPedido = new javax.swing.JMenuItem();
         menuAjuda = new javax.swing.JMenu();
         itemMenuSobre = new javax.swing.JMenuItem();
 
@@ -66,6 +68,22 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
         menuCadastros.add(itemMenuPessoa);
+
+        itemMenuProduto.setText("Produto");
+        itemMenuProduto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                itemMenuProdutoActionPerformed(evt);
+            }
+        });
+        menuCadastros.add(itemMenuProduto);
+
+        itemMenuPedido.setText("Pedido");
+        itemMenuPedido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                itemMenuPedidoActionPerformed(evt);
+            }
+        });
+        menuCadastros.add(itemMenuPedido);
 
         jMenuBar1.add(menuCadastros);
 
@@ -122,6 +140,20 @@ public class MenuPrincipal extends javax.swing.JFrame {
         cadastroPessoa.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
     }//GEN-LAST:event_itemMenuPessoaActionPerformed
 
+    private void itemMenuProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_itemMenuProdutoActionPerformed
+        CadastroProduto cadastroProduto = new CadastroProduto();
+        cadastroProduto.setLocationRelativeTo(null);
+        cadastroProduto.setVisible(true);
+        cadastroProduto.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+    }//GEN-LAST:event_itemMenuProdutoActionPerformed
+
+    private void itemMenuPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_itemMenuPedidoActionPerformed
+        MeusPedidos meusPedidos = new MeusPedidos();
+        meusPedidos.setLocationRelativeTo(null);
+        meusPedidos.setVisible(true);
+        meusPedidos.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+    }//GEN-LAST:event_itemMenuPedidoActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -162,7 +194,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem itemMenuCidade;
     private javax.swing.JMenuItem itemMenuEstado;
+    private javax.swing.JMenuItem itemMenuPedido;
     private javax.swing.JMenuItem itemMenuPessoa;
+    private javax.swing.JMenuItem itemMenuProduto;
     private javax.swing.JMenuItem itemMenuSobre;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu menuAjuda;

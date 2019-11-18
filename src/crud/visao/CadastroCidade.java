@@ -5,20 +5,14 @@
  */
 package crud.visao;
 
-import crud.modelo.Banco;
-import crud.modelo.CidadeDao;
-import crud.modelo.EstadoDao;
+import dao.HibernateUtil;
 import entidade.Cidade;
 import entidade.Estado;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -30,9 +24,19 @@ public class CadastroCidade extends javax.swing.JFrame {
     /**
      * Creates new form CadastroCidade
      */
-     private Cidade cid = new Cidade();
-    public CidadeDao cidadeDao = new CidadeDao();
-    public EstadoDao estadoDao = new EstadoDao();
+    private List<Cidade> listaCidades;
+    private List<Estado> listaEstados;
+    private Cidade cid;
+
+    public List<Cidade> getListaCidades() {
+        return listaCidades;
+    }
+
+    public void setListaCidades(List<Cidade> listaCidades) {
+        this.listaCidades = listaCidades;
+    }
+    
+    
     
     public CadastroCidade() {
         initComponents();
@@ -65,6 +69,7 @@ public class CadastroCidade extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         campoBusca = new javax.swing.JTextField();
+        btnNovo = new javax.swing.JToggleButton();
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -113,6 +118,11 @@ public class CadastroCidade extends javax.swing.JFrame {
 
             }
         ));
+        tabela.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabelaMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tabela);
 
         jLabel3.setText("ID:");
@@ -139,6 +149,13 @@ public class CadastroCidade extends javax.swing.JFrame {
         campoBusca.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 campoBuscaKeyReleased(evt);
+            }
+        });
+
+        btnNovo.setText("Novo");
+        btnNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNovoActionPerformed(evt);
             }
         });
 
@@ -174,20 +191,20 @@ public class CadastroCidade extends javax.swing.JFrame {
                                                 .addComponent(jLabel4)))))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(15, 15, 15)
-                                .addComponent(btnADD)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnRemover)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnAtualizar))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(104, 104, 104)
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(104, 104, 104)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(btnADD)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnRemover)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAtualizar)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnNovo)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -199,25 +216,30 @@ public class CadastroCidade extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(campoID, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(comboEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnADD)
-                    .addComponent(btnRemover)
-                    .addComponent(btnAtualizar))
-                .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(comboEstado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnADD)
+                            .addComponent(btnRemover)
+                            .addComponent(btnAtualizar))
+                        .addGap(17, 17, 17)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(65, 65, 65)
+                        .addComponent(btnNovo)))
                 .addContainerGap())
         );
 
@@ -242,31 +264,24 @@ public class CadastroCidade extends javax.swing.JFrame {
     private void btnADDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnADDActionPerformed
          if (validaSalvar()) {
                 try {
-                    if (campoID.getText().equals("")) {
-                        //est.setId(Integer.parseInt(campoId.getText()));
-                   
-                    cid.setNome(campoNome.getText());
-                    cid.setEstado(comboEstado.getSelectedIndex());
                     
-                    cidadeDao.create(cid);
-
-                    cidadeDao.getResultList();
-                    atualizaTabela();
-                   
-                    limpaCampos();
-                    
+                    if (!campoID.getText().equals("")) {
+                        cid.setId(Integer.parseInt(campoID.getText()));
                     } else {
-                        
-                        cid.setNome(campoNome.getText());
-                        cid.setEstado(comboEstado.getSelectedIndex());
-                    
-                        cidadeDao.update(cid, Integer.parseInt(campoID.getText()));
-                        cidadeDao.getResultList();
-                        
-                        System.out.println("EDITA AI");
-                        limpaCampos();
-                        atualizaTabela();
+                        cid.setId(null);
                     }
+                    
+                    cid.setNome(campoNome.getText());
+                    cid.setEstado(listaEstados.get(comboEstado.getSelectedIndex()));
+                    
+                    HibernateUtil.beginTransaction();
+                    HibernateUtil.getSession().merge(cid);
+                    HibernateUtil.commitTransaction();
+                    HibernateUtil.closeSession();
+                    
+                    limpaCampos();
+                    atualizaTabela();
+                    
                 } catch (Exception ex) {
                     Logger.getLogger(CadastroCidade.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -290,7 +305,7 @@ public class CadastroCidade extends javax.swing.JFrame {
            
             cid.setId(Integer.parseInt(tabela.getValueAt(row, 0).toString()));
             cid.setNome(tabela.getValueAt(row, 1).toString());
-            cid.setEstado(Integer.parseInt(tabela.getValueAt(row, 2).toString()));
+           // cid.setEstado(Integer.parseInt(tabela.getValueAt(row, 2).toString()));
            
         } catch (Exception ex) {
             Logger.getLogger(CadastroCidade.class.getName()).log(Level.SEVERE, null, ex);
@@ -299,33 +314,29 @@ public class CadastroCidade extends javax.swing.JFrame {
 
     private void btnRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverActionPerformed
         try {
-            DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-            
-            //pega o item da tabela selecionado e remove da memoria
-            cidadeDao.remove(tabela.getSelectedRow());
-            
-            //remove o item da tabela
-            model.removeRow(tabela.getSelectedRow());
-            
-            //busca lista para ver se realmente removeu da memoria.
-            cidadeDao.getResultList();
+             HibernateUtil.beginTransaction();
+            HibernateUtil.getSession().delete(cid);
+            HibernateUtil.commitTransaction();
+            HibernateUtil.closeSession();
+            montaTabela();
+            limpaCampos();
         } catch (Exception ex) {
             Logger.getLogger(CadastroCidade.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnRemoverActionPerformed
 
     private void campoBuscaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_campoBuscaKeyReleased
-        atualizaTabelaBusca();
-      
-       DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-    
-       String text = campoBusca.getText();
-       
-        for (Cidade c : cidadeDao.pegaBusca(text)) {
-            modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getEstado()});
-        }
-        
-        tabela.setModel(modelo);
+//        atualizaTabelaBusca();
+//      
+//       DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
+//    
+//       String text = campoBusca.getText();
+//       
+//        for (Cidade c : cidadeDao.pegaBusca(text)) {
+//            modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getEstado()});
+//        }
+//        
+//        tabela.setModel(modelo);
     }//GEN-LAST:event_campoBuscaKeyReleased
 
     private void campoBuscaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_campoBuscaActionPerformed
@@ -335,6 +346,18 @@ public class CadastroCidade extends javax.swing.JFrame {
     private void comboEstadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboEstadoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_comboEstadoActionPerformed
+
+    private void tabelaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaMouseClicked
+        cid = listaCidades.get(tabela.getSelectedRow());
+        campoID.setText(cid.getId().toString());
+        campoNome.setText(cid.getNome());
+        comboEstado.setSelectedItem(cid.getEstado().getNome());
+    }//GEN-LAST:event_tabelaMouseClicked
+
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+        cid = new Cidade();
+        limpaCampos();
+    }//GEN-LAST:event_btnNovoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -374,6 +397,7 @@ public class CadastroCidade extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnADD;
     private javax.swing.JButton btnAtualizar;
+    private javax.swing.JToggleButton btnNovo;
     private javax.swing.JButton btnRemover;
     private javax.swing.JTextField campoBusca;
     private javax.swing.JTextField campoID;
@@ -393,20 +417,10 @@ public class CadastroCidade extends javax.swing.JFrame {
     ArrayList<Integer> idEstados = new ArrayList<>();
     
    private void preencherComboEstados() {
-        try {
-            Connection conn = Banco.abrirConexao();
-        
-            comboEstado.removeAllItems();
-            
-            for (Estado e : estadoDao.getEstados()) {
-            //para cada estado é adicionado o nome na combo de estado.
+        listaEstados = HibernateUtil.getSession().createCriteria(Estado.class).list();
+        comboEstado.removeAllItems();
+        for (Estado e : listaEstados) {
             comboEstado.addItem(e.getNome());
-        }
-            
-        conn.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
    
@@ -414,17 +428,20 @@ public class CadastroCidade extends javax.swing.JFrame {
     
     
     public void montaTabela() {
-        DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-
+        listaCidades = HibernateUtil.getSession().createCriteria(Cidade.class).list();        
+        DefaultTableModel modelo = new DefaultTableModel(){
+            @Override
+    public boolean isCellEditable(int row, int column) {
+       //all cells false
+       return false;
+    }
+        };
         modelo.addColumn("Código");
         modelo.addColumn("Nome");
-        modelo.addColumn("Estado");
-
-        for (Cidade c : cidadeDao.getCidades()) {
+        modelo.addColumn("Sigla");        
+        for(Cidade c : listaCidades){
             modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getEstado()});
         }
-
-        JTable tabela = new JTable(modelo);
         tabela.setModel(modelo);
     }
     

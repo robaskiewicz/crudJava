@@ -1,20 +1,47 @@
 package entidade;
 
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
  
-public class Estado implements Comparable<Estado>{
-    
-    private Integer Id;
-    private String nome;
-    private String sigla;
-    
-    public Estado(){}
 
-    public Estado(String nome, String sigla) {
-       this.nome = nome;
-       this.sigla = sigla; 
-    }
+@Entity
+public class Estado{
+    @Id 
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Integer id;
+    @Column(length = 2, nullable = false)
+    private String sigla;
+    @Column(length = 100, nullable = false)
+    private String nome;
     
+    @OneToMany(mappedBy="estado",cascade=CascadeType.MERGE, orphanRemoval=true)
+    private List<Cidade> cidades;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+   
+
+    public String getSigla() {
+        return sigla;
+    }
+
+    public void setSigla(String sigla) {
+        this.sigla = sigla;
+    }
+
     public String getNome() {
         return nome;
     }
@@ -23,33 +50,28 @@ public class Estado implements Comparable<Estado>{
         this.nome = nome;
     }
 
-    public String getSigla() {
-        return sigla;
+    public List<Cidade> getCidades() {
+        return cidades;
     }
 
-    public void setSigla(String uf) {
-        this.sigla = uf;
+    public void setCidades(List<Cidade> cidades) {
+        this.cidades = cidades;
     }
-
-    public Integer getId() {
-        return Id;
-    }
-
-    public void setId(Integer Id) {
-        this.Id = Id;
-    }
-
-    
-
-    
+	
 
     @Override
-    public String toString() {
-        return nome +" - "+ sigla;
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + (int) (this.id ^ (this.id >>> 32));
+        hash = 67 * hash + Objects.hashCode(this.nome);
+        return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
@@ -57,17 +79,22 @@ public class Estado implements Comparable<Estado>{
             return false;
         }
         final Estado other = (Estado) obj;
-        if (!Objects.equals(this.nome, other.nome)) {
+        if (this.id != other.id) {
             return false;
         }
         return true;
     }
 
-    //Serve para ordenar uma lista de objetos do tipo Estado.
-    //O retorno deste método é -1, 0, 1, sendo -1 menor, 0 igual, 1 maior.
+    
+    
+    
     @Override
-    public int compareTo(Estado objEst) {
-        return nome.compareTo(objEst.getNome());
+    public String toString() {
+        return nome + " - " + sigla;
     }
+    
+
+
+   
     
 }

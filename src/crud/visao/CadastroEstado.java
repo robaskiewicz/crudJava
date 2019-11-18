@@ -5,23 +5,15 @@
  */
 package crud.visao;
 
-import crud.modelo.Banco;
-import crud.modelo.EstadoDao;
+import dao.HibernateUtil;
 import entidade.Estado;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
+import org.hibernate.Hibernate;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  *
@@ -32,26 +24,40 @@ public class CadastroEstado extends javax.swing.JFrame {
     /**
      * Creates new form CadastroEstado
      */
-    private Estado est = new Estado();
-    private EstadoDao estadoDao = new EstadoDao();
+    
+    private List<Estado> listaEstados;
+    private Estado est;
+    
+    public List<Estado> getListaEstados() {
+        return listaEstados;
+    }
 
+    public void setListaEstados(List<Estado> listaEstados) {
+        this.listaEstados = listaEstados;
+    }
+    
     public CadastroEstado() {
         initComponents();
         montaTabela();
+         campoId.setEnabled(false);
+        setResizable(false);
     }
 
-    public void montaTabela() {
-        DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-        
+   private void montaTabela() {
+        listaEstados = HibernateUtil.getSession().createCriteria(Estado.class).list();        
+        DefaultTableModel modelo = new DefaultTableModel(){
+            @Override
+    public boolean isCellEditable(int row, int column) {
+       //all cells false
+       return false;
+    }
+        };
         modelo.addColumn("Código");
         modelo.addColumn("Nome");
-        modelo.addColumn("Sigla");
-
-        for (Estado e : estadoDao.getEstados()) {
+        modelo.addColumn("Sigla");        
+        for(Estado e : listaEstados){
             modelo.addRow(new Object[]{e.getId(), e.getNome(), e.getSigla()});
         }
-
-        JTable tabela = new JTable(modelo);
         tabela.setModel(modelo);
     }
     
@@ -116,12 +122,13 @@ public class CadastroEstado extends javax.swing.JFrame {
         tabela = new javax.swing.JTable();
         btnAdd = new javax.swing.JButton();
         btnRemover = new javax.swing.JButton();
-        btnAtualizar = new javax.swing.JButton();
+        btnEditar = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         campoId = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         campoBusca = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
+        btnNovo = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -143,6 +150,11 @@ public class CadastroEstado extends javax.swing.JFrame {
 
             }
         ));
+        tabela.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabelaMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tabela);
 
         btnAdd.setText("ADD");
@@ -159,10 +171,10 @@ public class CadastroEstado extends javax.swing.JFrame {
             }
         });
 
-        btnAtualizar.setText("atualizar");
-        btnAtualizar.addActionListener(new java.awt.event.ActionListener() {
+        btnEditar.setText("editar");
+        btnEditar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAtualizarActionPerformed(evt);
+                btnEditarActionPerformed(evt);
             }
         });
 
@@ -185,6 +197,13 @@ public class CadastroEstado extends javax.swing.JFrame {
         });
 
         jLabel5.setText("BUSCAR:");
+
+        btnNovo.setText("Novo");
+        btnNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNovoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -214,17 +233,19 @@ public class CadastroEstado extends javax.swing.JFrame {
                                         .addGap(92, 92, 92)
                                         .addComponent(btnRemover)
                                         .addGap(27, 27, 27)
-                                        .addComponent(btnAtualizar))
+                                        .addComponent(btnEditar))
                                     .addGroup(layout.createSequentialGroup()
                                         .addGap(70, 70, 70)
                                         .addComponent(jLabel5)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addGap(18, 18, 18)
-                                .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 21, Short.MAX_VALUE)))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(btnNovo)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel3)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(0, 26, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -232,7 +253,7 @@ public class CadastroEstado extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(campoId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -240,15 +261,16 @@ public class CadastroEstado extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(campoNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addGap(10, 10, 10)
+                .addGap(6, 6, 6)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(campoSigla, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addComponent(btnNovo))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAdd)
                     .addComponent(btnRemover)
-                    .addComponent(btnAtualizar))
+                    .addComponent(btnEditar))
                 .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(campoBusca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -269,37 +291,23 @@ public class CadastroEstado extends javax.swing.JFrame {
 
             if (validaSalvar()) {
                 try {
-                    if (campoId.getText().equals("")) {
-                        //est.setId(Integer.parseInt(campoId.getText()));
-                   
+                    if (!campoId.getText().equals("")) {
+                        est.setId(Integer.parseInt(campoId.getText()));
+                    } else {
+                       est.setId(null);
+                    }
+                    
                     est.setNome(campoNome.getText());
                     est.setSigla(campoSigla.getText());
                     
-                    estadoDao.create(est);
+                    HibernateUtil.beginTransaction();
+                    HibernateUtil.getSession().merge(est);
+                    HibernateUtil.commitTransaction();
+                    HibernateUtil.closeSession();
                     
-//                    DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-//                    
-//                    model.addRow(new Object[]{est.getId(), est.getNome(), est.getSigla()});
-                    
-                    //busca lista para ver se realmente  da memoria.
-                    estadoDao.getResultList();
+                    limpaCampos();
                     atualizaTabela();
                     
-                    //limpa os campos para nova inserção
-                    limpaCampos();
-                    } else {
-                        //est.setId(null);
-                        
-                        est.setNome(campoNome.getText());
-                        est.setSigla(campoSigla.getText());
-                    
-                        estadoDao.update(est, Integer.parseInt(campoId.getText()));
-                        estadoDao.getResultList();
-                        
-                        System.out.println("EDITA AI");
-                        limpaCampos();
-                        atualizaTabela();
-                    }
                 } catch (Exception ex) {
                     Logger.getLogger(CadastroEstado.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -307,62 +315,50 @@ public class CadastroEstado extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverActionPerformed
-        try {
-            DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-            
-            //pega o item da tabela selecionado e remove da memoria
-            estadoDao.remove(tabela.getSelectedRow());
-            
-            //remove o item da tabela
-            model.removeRow(tabela.getSelectedRow());
-            
-            //busca lista para ver se realmente removeu da memoria.
-            estadoDao.getResultList();
-        } catch (Exception ex) {
-            Logger.getLogger(CadastroEstado.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        HibernateUtil.beginTransaction();
+        HibernateUtil.getSession().delete(est);
+        HibernateUtil.commitTransaction();
+        HibernateUtil.closeSession();
+        montaTabela();
+        limpaCampos();
     }//GEN-LAST:event_btnRemoverActionPerformed
 
-    private void btnAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtualizarActionPerformed
-        try {
-            DefaultTableModel model = (DefaultTableModel) tabela.getModel();
-            
-            int row = tabela.getSelectedRow();
-            
-            
-            tabela.getValueAt(row, 0);
-            
-            campoId.setText(tabela.getValueAt(row, 0).toString());
-            campoNome.setText(tabela.getValueAt(row, 1).toString());
-            campoSigla.setText(tabela.getValueAt(row, 2).toString());
-           
-            est.setId(Integer.parseInt(tabela.getValueAt(row, 0).toString()));
-            est.setNome(tabela.getValueAt(row, 1).toString());
-            est.setSigla(tabela.getValueAt(row, 2).toString());
-           
-        } catch (Exception ex) {
-            Logger.getLogger(CadastroEstado.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }//GEN-LAST:event_btnAtualizarActionPerformed
+    private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
+        est = listaEstados.get(tabela.getSelectedRow());
+        campoId.setText(est.getId().toString());
+        campoNome.setText(est.getNome());
+        campoSigla.setText(est.getSigla());
+    }//GEN-LAST:event_btnEditarActionPerformed
 
     private void campoBuscaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_campoBuscaActionPerformed
        
     }//GEN-LAST:event_campoBuscaActionPerformed
 
     private void campoBuscaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_campoBuscaKeyReleased
-        atualizaTabelaBusca();
-      
-       DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-    
-       String text = campoBusca.getText();
-       
-        for (Estado e : estadoDao.pegaBusca(text)) {
-            modelo.addRow(new Object[]{e.getId(), e.getNome(), e.getSigla()});
-        }
-        
-        tabela.setModel(modelo);
+//        atualizaTabelaBusca();
+//      
+//       DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
+//    
+//       String text = campoBusca.getText();
+//       
+//        for (Estado e : estadoDao.pegaBusca(text)) {
+//            modelo.addRow(new Object[]{e.getId(), e.getNome(), e.getSigla()});
+//        }
+//        
+//        tabela.setModel(modelo);
     }//GEN-LAST:event_campoBuscaKeyReleased
+
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+       est = new Estado();
+        limpaCampos();
+    }//GEN-LAST:event_btnNovoActionPerformed
+
+    private void tabelaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaMouseClicked
+        est = listaEstados.get(tabela.getSelectedRow());
+        campoId.setText(est.getId().toString());
+        campoNome.setText(est.getNome());
+        campoSigla.setText(est.getSigla());
+    }//GEN-LAST:event_tabelaMouseClicked
 
     /**
      * @param args the command line arguments
@@ -401,7 +397,8 @@ public class CadastroEstado extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
-    private javax.swing.JButton btnAtualizar;
+    private javax.swing.JButton btnEditar;
+    private javax.swing.JToggleButton btnNovo;
     private javax.swing.JButton btnRemover;
     private javax.swing.JTextField campoBusca;
     private javax.swing.JTextField campoId;
